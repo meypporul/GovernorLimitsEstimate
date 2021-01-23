@@ -1,0 +1,74 @@
+public class GovernorLimitsEstimate {
+
+    public static Map<String, Integer> Start_Limits_Map = new Map<String, Integer>();
+    public static Map<String, Integer> End_Limits_Map = new Map<String, Integer>();
+    public static Map<String, Integer> Allowed_Limits_Map = new Map<String, Integer>();
+    public static Map<String, Integer> Consuemd_Limits_Percent_Map = new Map<String, Integer>();
+    public static Map<String, Integer> Past_ThresholdLimits_Percent_Map = new Map<String, Integer>();
+    public static final Integer Threshold = 95;
+
+    static void GetAllowedLimits() {
+        Allowed_Limits_Map.put( 'getCpuTime' , Limits.getLimitCpuTime() );
+        Allowed_Limits_Map.put( 'getQueries' , Limits.getLimitQueries() );
+		Allowed_Limits_Map.put( 'getQueryRows' , Limits.getLimitQueryRows() );
+        Allowed_Limits_Map.put( 'getDMLStatements' , Limits.getLimitDMLStatements() );
+        Allowed_Limits_Map.put( 'getQueueableJobs' , Limits.getLimitQueueableJobs() );
+        Allowed_Limits_Map.put( 'getHeapSize' , Limits.getLimitHeapSize() );
+        Allowed_Limits_Map.put( 'getFutureCalls' , Limits.getLimitFutureCalls() );
+    } 
+    
+    public static void StartLimitsTest() {
+        // Get Limits
+        Start_Limits_Map.put( 'getCpuTime' , Limits.getCpuTime() );
+        Start_Limits_Map.put( 'getQueries' , Limits.getQueries() );
+		Start_Limits_Map.put( 'getQueryRows' , Limits.getQueryRows() );
+        Start_Limits_Map.put( 'getDMLStatements' , Limits.getDMLStatements() );
+        Start_Limits_Map.put( 'getQueueableJobs' , Limits.getQueueableJobs() );
+        Start_Limits_Map.put( 'getHeapSize' , Limits.getHeapSize() );
+        Start_Limits_Map.put( 'getFutureCalls' , Limits.getFutureCalls() );        
+    }
+   
+    
+    public static void EndLimitsTest() {
+        // Get Limits
+        End_Limits_Map.put( 'getCpuTime' , Limits.getCpuTime() );
+        End_Limits_Map.put( 'getQueries' , Limits.getQueries() );
+		End_Limits_Map.put( 'getQueryRows' , Limits.getQueryRows() );
+        End_Limits_Map.put( 'getDMLStatements' , Limits.getDMLStatements() );
+        End_Limits_Map.put( 'getQueueableJobs' , Limits.getQueueableJobs() );
+        End_Limits_Map.put( 'getHeapSize' , Limits.getHeapSize() );
+        End_Limits_Map.put( 'getFutureCalls' , Limits.getFutureCalls() );
+        
+        GetAllowedLimits();
+    }
+    
+    public static boolean WithinLimitsThreshold() {
+        
+        for( String AllowedLimits : Allowed_Limits_Map.keySet() ) {
+            
+            Integer EndLimit = End_Limits_Map.get( AllowedLimits );
+            if( AllowedLimits == 'getQueries' )
+				EndLimit = EndLimit - 2; // to offset the SOQL fired in this class
+            
+            Integer StartLimit = Start_Limits_Map.get( AllowedLimits );
+            Integer AllowedLimit = Allowed_Limits_Map.get( AllowedLimits );
+            
+            Decimal CalcLimit = (Decimal)EndLimit/(Decimal)AllowedLimit * 100;
+            
+			Integer ConsumedLimit = Integer.valueOf(CalcLimit.round(System.RoundingMode.UP));
+            system.debug('ConsumedLimit: ' + AllowedLimits + ' --> '  + ConsumedLimit);
+            
+            if(ConsumedLimit > Threshold) {
+                Past_ThresholdLimits_Percent_Map.put(AllowedLimits, ConsumedLimit);
+            }
+            Consuemd_Limits_Percent_Map.put(AllowedLimits, ConsumedLimit);
+
+        }
+        
+        if( Past_ThresholdLimits_Percent_Map.isEmpty() ) 
+            return true;
+        
+        return false;
+    }
+       
+}
