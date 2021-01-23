@@ -1,0 +1,56 @@
+
+public class GovernorLimitsEstimate_test {
+    
+    @testSetup
+    static void testSetup() {
+        List<Account> AccountList = new List<Account>();
+        for(Integer i = 0; i<98; i++) {
+            Account NewAccount = new Account(Name = 'Test' + i);
+            AccountList.add(NewAccount);
+        }
+        Insert AccountList;
+    }
+
+    @isTest
+    static void test_Within_Limits () {
+        Test.startTest();
+        BIIB_Limits_Estimate_for_Testing.StartLimitsTest();
+        
+        List<Account> actList = [Select Id from Account Limit 94];
+        for (Account act: actList) {
+            Account TestAct =  [Select Id from Account Limit 1];
+         }
+        
+        BIIB_Limits_Estimate_for_Testing.EndLimitsTest();
+        Test.stopTest();
+		
+        boolean WithinLimitsThreshold = BIIB_Limits_Estimate_for_Testing.WithinLimitsThreshold();
+        
+        system.assertEquals(WithinLimitsThreshold , true); //Check if the method retuns true for remining within Limits
+        
+    }
+    
+    @isTest
+    static void test_Above_Limits () {
+        Test.startTest();
+        BIIB_Limits_Estimate_for_Testing.StartLimitsTest();
+        
+        List<Account> actList = [Select Id from Account Limit 95]; //SOQL outside limits 96 SOQL
+       
+        for (Account act: actList) {
+            Account TestAct =  [Select Id from Account Limit 1];
+         }
+
+		BIIB_Error_Log__c objErrorLog = new BIIB_Error_Log__c(BIIB_Failure_Record_Id__c = actList[0].Id, BIIB_Component_Name__c = 'BIIB_Limits_Estimate_for_Testing_test', BIIB_Error_Detail__c = 'Error Testing', BIIB_Method_Name__c = 'test_Outside_Limits', BIIB_Timestamp__c = system.now());
+        Insert objErrorLog;
+        
+        BIIB_Limits_Estimate_for_Testing.EndLimitsTest();
+        Test.stopTest();
+		
+        boolean WithinLimitsThreshold = BIIB_Limits_Estimate_for_Testing.WithinLimitsThreshold();
+        
+        system.assertEquals(WithinLimitsThreshold, false); //Check if the method retuns false for failure to comply wiht Limits
+        
+    }    
+    
+}
