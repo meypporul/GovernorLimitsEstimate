@@ -66,10 +66,7 @@ public class GovernorLimitsEstimate {
 
         }
         
-        if( Past_ThresholdLimits_Percent_Map.isEmpty() ) 
-            return true;
-        
-        return false;
+        return Past_ThresholdLimits_Percent_Map.isEmpty();
     }
        
 }
