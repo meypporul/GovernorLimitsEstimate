@@ -51,7 +51,6 @@ public class GovernorLimitsEstimate {
         for( String AllowedLimits : Allowed_Limits_Map.keySet() ) {
             
             Integer EndLimit = End_Limits_Map.get( AllowedLimits );
-            Integer StartLimit = Start_Limits_Map.get( AllowedLimits );
             Integer AllowedLimit = Allowed_Limits_Map.get( AllowedLimits );
             
             Decimal CalcLimit = (Decimal)EndLimit/(Decimal)AllowedLimit * 100;
